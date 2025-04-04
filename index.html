@@ -16,26 +16,14 @@
     <h1 class="text-3xl font-bold mb-4">Welcome to Get Key System</h1>
     <p class="mb-4 text-gray-600">Please wait 5 seconds to get your key.</p>
 
-    <div id="key" class="text-lg font-mono bg-gray-100 p-4 rounded-xl mb-4 text-gray-800 shadow-inner">
-      Waiting...
-    </div>
+    <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md mb-4" readonly value="Waiting..."/>
 
-    <button id="getBtn" disabled
-      class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md">
+    <button id="copyBtn" disabled class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md">
       Please wait...
     </button>
-
-    <div class="mt-4">
-      <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md" readonly />
-      <button id="copyBtn" class="bg-green-500 text-white px-6 py-2 mt-2 rounded-md w-full">
-        Copy Key
-      </button>
-    </div>
   </div>
 
   <script>
-    let currentKey = ""; 
-
     function generateKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let result = 'R2LX-';
@@ -50,13 +38,13 @@
     }
 
     setTimeout(() => {
-      currentKey = generateKey();
-      document.getElementById('key').textContent = currentKey;
-      document.getElementById('keyInput').value = currentKey;
+      const key = generateKey();
+      const keyInput = document.getElementById('keyInput');
+      keyInput.value = key;
 
-      const btn = document.getElementById('getBtn');
-      btn.textContent = "Copy Key";
-      btn.disabled = false;
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.textContent = "Copy Key";
+      copyBtn.disabled = false;
     }, 5000);
 
     document.getElementById('copyBtn').addEventListener('click', () => {
