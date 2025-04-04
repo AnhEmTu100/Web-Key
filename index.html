@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Get Key</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-white">
+  <div class="bg-white text-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold mb-4">Welcome to Get Key System</h1>
+    <p class="mb-4 text-gray-600">Please wait 5 seconds to get your key.</p>
+
+    <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md mb-4" readonly value="Waiting..."/>
+
+    <button id="copyBtn" disabled class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md">
+      Please wait...
+    </button>
+  </div>
+
+  <script>
+    function generateKey() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = 'R2LX-';
+      for (let i = 0; i < 3; i++) {
+        let part = '';
+        for (let j = 0; j < 4; j++) {
+          part += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        result += part + (i < 2 ? '-' : '');
+      }
+      return result;
+    }
+
+    setTimeout(() => {
+      const key = generateKey();
+      const keyInput = document.getElementById('keyInput');
+      keyInput.value = key;
+
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.textContent = "Copy Key";
+      copyBtn.disabled = false;
+    }, 5000);
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const keyInput = document.getElementById("keyInput");
+      keyInput.select();
+      keyInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Key copied to clipboard!");
+    });
+  </script>
+</body>
+</html>
