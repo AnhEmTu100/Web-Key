@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Get Key</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -52,11 +51,13 @@
       btn.disabled = false;
 
       btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(currentKey).then(() => {
-          alert('Key copied to clipboard!');
-        }).catch(() => {
-          alert('Failed to copy key.');
-        });
+        const tempInput = document.createElement("input");
+        tempInput.value = currentKey;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        alert('Key copied to clipboard!');
       });
     }, 5000);
   </script>
