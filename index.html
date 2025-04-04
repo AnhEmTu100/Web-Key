@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Get Key</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -28,47 +27,43 @@
 
     <div class="mt-4">
       <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md" readonly />
-      <button id="copyBtn" class="bg-blue-500 text-white px-6 py-2 mt-2 rounded-md w-full" data-clipboard-target="#keyInput">
+      <button id="copyBtn" class="bg-green-500 text-white px-6 py-2 mt-2 rounded-md w-full">
         Copy Key
       </button>
     </div>
   </div>
 
   <script>
+    const key = generateKey();
+
     function generateKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = 'R2LX-';  // Tiền tố "R2LX-"
-      
-      // Tạo 3 phần ngẫu nhiên, mỗi phần có 4 ký tự
-      for (let i = 0; i < 3; i++) {
+      let result = '';
+      for (let i = 0; i < 4; i++) {
         let part = '';
         for (let j = 0; j < 4; j++) {
-          part += chars.charAt(Math.floor(Math.random() * chars.length));  // Lấy ngẫu nhiên ký tự từ chars
+          part += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        result += part + (i < 2 ? '-' : '');  // Thêm dấu "-" giữa các phần
+        result += part + (i < 3 ? '-' : '');
       }
-      
       return result;
     }
 
     setTimeout(() => {
       const keyInput = document.getElementById('keyInput');
       const btn = document.getElementById('getBtn');
-      const key = generateKey();  // Tạo key với R2LX
-      keyInput.value = key;  // Đặt key vào ô input
-      document.getElementById('key').textContent = key;  // Hiển thị key trên trang
+      keyInput.value = key;  // Set the key in the input field
       btn.textContent = "Copy Key";
       btn.disabled = false;
     }, 5000);
 
-    // Sử dụng clipboard.js để sao chép key
-    var clipboard = new ClipboardJS('#copyBtn');
-    clipboard.on('success', function(e) {
-      alert('Key copied to clipboard!');
-    });
-    clipboard.on('error', function(e) {
-      alert('Failed to copy key.');
-    });
+    document.getElementById('copyBtn').onclick = function() {
+      const keyInput = document.getElementById('keyInput');
+      keyInput.select();
+      document.execCommand("copy");
+
+      alert("Key copied to clipboard!");
+    };
   </script>
 </body>
 </html>
