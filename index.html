@@ -24,6 +24,13 @@
       class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md">
       Please wait...
     </button>
+
+    <div class="mt-4">
+      <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md" readonly />
+      <button id="copyBtn" class="bg-green-500 text-white px-6 py-2 mt-2 rounded-md w-full">
+        Copy Key
+      </button>
+    </div>
   </div>
 
   <script>
@@ -45,21 +52,20 @@
     setTimeout(() => {
       currentKey = generateKey();
       document.getElementById('key').textContent = currentKey;
+      document.getElementById('keyInput').value = currentKey;
 
       const btn = document.getElementById('getBtn');
       btn.textContent = "Copy Key";
       btn.disabled = false;
-
-      btn.addEventListener('click', () => {
-        const tempInput = document.createElement("input");
-        tempInput.value = currentKey;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        alert('Key copied to clipboard!');
-      });
     }, 5000);
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const keyInput = document.getElementById("keyInput");
+      keyInput.select();
+      keyInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Key copied to clipboard!");
+    });
   </script>
 </body>
 </html>
