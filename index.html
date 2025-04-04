@@ -24,17 +24,12 @@
     <button id="getBtn" disabled
       class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md">
       Please wait...
-          </button>
-
-    <div class="mt-4">
-      <input id="keyInput" type="text" class="w-full p-3 text-center bg-gray-100 text-xl rounded-md" readonly />
-      <button id="copyBtn" class="bg-green-500 text-white px-6 py-2 mt-2 rounded-md w-full" data-clipboard-target="#keyInput">
-        Copy Key
-      </button>
-    </div>
+    </button>
   </div>
 
   <script>
+    let currentKey = ""; 
+
     function generateKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let result = 'R2LX-';
@@ -49,21 +44,21 @@
     }
 
     setTimeout(() => {
-      const key = generateKey();
-      document.getElementById('key').textContent = key;
+      currentKey = generateKey();
+      document.getElementById('key').textContent = currentKey;
+
       const btn = document.getElementById('getBtn');
       btn.textContent = "Copy Key";
       btn.disabled = false;
-    }, 5000);
 
-    // Sử dụng clipboard.js để sao chép key
-    var clipboard = new ClipboardJS('#copyBtn');
-    clipboard.on('success', function(e) {
-      alert('Key copied to clipboard!');
-    });
-    clipboard.on('error', function(e) {
-      alert('Failed to copy key.');
-    });
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(currentKey).then(() => {
+          alert('Key copied to clipboard!');
+        }).catch(() => {
+          alert('Failed to copy key.');
+        });
+      });
+    }, 5000);
   </script>
 </body>
 </html>
