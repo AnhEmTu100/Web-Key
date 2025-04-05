@@ -621,33 +621,6 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -----
-local ToggleEnabled = false
-
-local function Click()
-    game:GetService("VirtualUser"):CaptureController()
-    game:GetService("VirtualUser"):Button1Down(Vector2.new(0,1,0,1))
-end
-
-Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu trong FOV", function(Value)
-    ToggleEnabled = Value
-    if ToggleEnabled then
-        -- Bắt đầu chạy aimbot
-        task.spawn(function()
-            while ToggleEnabled do
-                Click()
-                task.wait(0.1) -- điều chỉnh tần suất gọi Click() nếu cần
-            end
-        end)
-    end
-end)
-
-
-Toggle = Se:CreateToggle("Atiban chest", "DESCRIPTION", function(Value)
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("GetFruits")
-        game:GetService("Players").LocalPlayer.PlayerGui.Main.FruitShop.Visible = true	
-      end    )
-
-
 
 local LocalizationService = game:GetService("LocalizationService")
 local player = game.Players.LocalPlayer
@@ -672,7 +645,7 @@ local data = {
             },
             footer = {
                 text = "R2lx Hub | Created by: Ari | https://discord.com/invite/E6ffTF57RG | Time: " .. os.date("%Y-%m-%d %H:%M:%S VN"),
-                icon_url = "https://cdn.discordapp.com/attachments/1226454597724409936/1233424140283940924/09b1d39ef857154916c5425b203eddac.jpg?ex=662d0b3e&is=662bb9be&hm=c9a53bdf01f40ef9cd37ea93422e2ed57ae74cdb31fb2cbf7be875214cb4d7ae&"
+                icon_url = "https://discord.com/channels/1223639038724935680/1236316401640411237/1358066394746327122"
             },
             fields = {
                 {
