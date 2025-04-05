@@ -7,6 +7,28 @@ local Notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/r2lx-hu
 
 --loadstring(game:HttpGet("https://raw.githubusercontent.com/ZoiIntra/AlchemyHub/main/InviteToDiscord.lua"))()
 
+--// Aim
+aim = true
+spawn(function()
+    local gg = getrawmetatable(game)
+    local old = gg.__namecall
+    setreadonly(gg,false)
+    gg.__namecall = newcclosure(function(...)
+        local method = getnamecallmethod()
+        local args = {...}
+        if tostring(method) == "FireServer" then
+            if tostring(args[1]) == "RemoteEvent" then
+                if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+                    if aim and CFrameHunt ~= nil then
+                        args[2] = CFrameHunt.Position
+                        return old(unpack(args))
+                    end
+                end
+            end
+        end
+        return old(...)
+    end)
+end)
 -- Tạo Thông Báo 💌 📢
 -- Add pop-up notification function
 -- Đảm bảo TweenService có sẵn
@@ -499,7 +521,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 -- Toggle Aimbot
-Toggle = Se:CreateToggle("Simple Aimbot", "Khóa camera vào người chơi gần nhất", function(Value)
+Toggle = pvp:CreateToggle("Simple Aimbot", "Khóa camera vào người chơi gần nhất", function(Value)
     _G.AimbotEnabled = Value
 end)
 -- Hàm tìm player gần nhất (trừ LocalPlayer)
@@ -588,7 +610,7 @@ local function getClosestTargetInFOV()
 end
 
 -- Toggle Aimbot
-Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu trong FOV", function(Value)
+Toggle = pvp:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu trong FOV", function(Value)
     _G.AimbotEnab = Value
     if Value then
         fovCircle = createFOV()
@@ -601,7 +623,7 @@ Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu t
 end)
 
 
-TextBox = Se:CreateBox("FOV Radius", "Nhập bán kính FOV (VD: 150)", function(val)
+TextBox = pvp:CreateBox("FOV Radius", "Nhập bán kính FOV (VD: 150)", function(val)
     local num = tonumber(val)
     if num then
         FOV_RADIUS = num
@@ -621,6 +643,84 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -----
+
+--- pvp
+Toggle = pvp:CreateToggle("Aim Skill", "Aim súng và skill", function(Value)
+        _G.Aimbot_Gun = Value
+        _G.Aimbot_Skill = Value
+
+    end    )
+
+
+Toggle = pvp:CreateToggle("Aim Skill Nearest  ", "Aim nearest", function(Value)
+        AimSkillNearest = Value
+    end    )
+
+spawn(function()
+    while task.wait() do
+        if _G.Aimbot_Gun and game:GetService("Players").LocalPlayer.Character:FindFirstChild(SelectWeaponGun) then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.Character[SelectWeaponGun].Cooldown.Value = 0
+                local args = {
+                    [1] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart.Position,
+                    [2] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart
+                }
+                game:GetService("Players").LocalPlayer.Character[SelectWeaponGun].RemoteFunctionShoot:InvokeServer(unpack(args))
+                game:GetService'VirtualUser':CaptureController()
+                game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
+            end)
+        end
+    end
+end)
+spawn(function()
+    pcall(function()
+        while task.wait() do
+            if _G.Aimbot_Skill and PlayerSelectAimbot ~= nil and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and game.Players.LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name]:FindFirstChild("MousePos") then
+                local args = {
+                    [1] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart.Position
+                }
+                
+                game:GetService("Players").LocalPlayer.Character:FindFirstChild(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name).RemoteEvent:FireServer(unpack(args))
+            end
+        end
+    end)
+end)
+
+spawn(function()
+	while wait(.1) do
+		pcall(function()
+			local MaxDistance = math.huge
+			for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+				if v.Name ~= game.Players.LocalPlayer.Name then
+					local Distance = v:DistanceFromCharacter(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+					if Distance < MaxDistance then
+						MaxDistance = Distance
+						TargetPlayerAim = v.Name
+					end
+				end
+			end
+		end)
+	end
+end)
+
+spawn(function()
+	pcall(function()
+		game:GetService("RunService").RenderStepped:connect(function()
+			if AimSkillNearest and TargetPlayerAim ~= nil and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and game.Players.LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name]:FindFirstChild("MousePos") then
+				local args = {
+					[1] = game:GetService("Players"):FindFirstChild(TargetPlayerAim).Character.HumanoidRootPart.Position
+				}
+				game:GetService("Players").LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name].RemoteEvent:FireServer(unpack(args))
+			end
+		end)
+	end)
+end)
+
+
+
+
+
+
 
 local LocalizationService = game:GetService("LocalizationService")
 local player = game.Players.LocalPlayer
