@@ -515,7 +515,7 @@ spawn(function()
     end
 end)
 
------
+-----pvp
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -644,76 +644,102 @@ end)
 
 -----
 
---- pvp
+-- Toggles
 Toggle = pvp:CreateToggle("Aim Skill", "Aim súng và skill", function(Value)
-        _G.Aimbot_Gun = Value
-        _G.Aimbot_Skill = Value
+    _G.Aimbot_Gun = Value
+    _G.Aimbot_Skill = Value
+end)
 
-    end    )
+Toggle = pvp:CreateToggle("Aim Skill Nearest", "Aim nearest", function(Value)
+    AimSkillNearest = Value
+end)
 
-
-Toggle = pvp:CreateToggle("Aim Skill Nearest  ", "Aim nearest", function(Value)
-        AimSkillNearest = Value
-    end    )
-
+-- Aimbot Gun
 spawn(function()
     while task.wait() do
-        if _G.Aimbot_Gun and game:GetService("Players").LocalPlayer.Character:FindFirstChild(SelectWeaponGun) then
-            pcall(function()
-                game:GetService("Players").LocalPlayer.Character[SelectWeaponGun].Cooldown.Value = 0
-                local args = {
-                    [1] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart.Position,
-                    [2] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart
-                }
-                game:GetService("Players").LocalPlayer.Character[SelectWeaponGun].RemoteFunctionShoot:InvokeServer(unpack(args))
-                game:GetService'VirtualUser':CaptureController()
-                game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
-            end)
-        end
+        pcall(function()
+            if _G.Aimbot_Gun and SelectWeaponGun and PlayerSelectAimbot then
+                local player = game:GetService("Players").LocalPlayer
+                local char = player.Character
+                local tool = char and char:FindFirstChild(SelectWeaponGun)
+                local target = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot)
+                
+                if tool and tool:FindFirstChild("RemoteFunctionShoot") and tool:FindFirstChild("Cooldown") and target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    tool.Cooldown.Value = 0
+                    local args = {
+                        [1] = target.Character.HumanoidRootPart.Position,
+                        [2] = target.Character.HumanoidRootPart
+                    }
+                    tool.RemoteFunctionShoot:InvokeServer(unpack(args))
+                    game:GetService("VirtualUser"):CaptureController()
+                    game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 672))
+                end
+            end
+        end)
     end
 end)
+
+-- Aimbot Skill (target theo PlayerSelectAimbot)
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if _G.Aimbot_Skill and PlayerSelectAimbot then
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local tool = char and char:FindFirstChildOfClass("Tool")
+                local target = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot)
+
+                if tool and char:FindFirstChild(tool.Name) and char[tool.Name]:FindFirstChild("MousePos") and target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local args = {
+                        [1] = target.Character.HumanoidRootPart.Position
+                    }
+                    char[tool.Name].RemoteEvent:FireServer(unpack(args))
+                end
+            end
+        end)
+    end
+end)
+
+-- Tìm player gần nhất
+spawn(function()
+    while wait(0.1) do
+        pcall(function()
+            local maxDist = math.huge
+            local localPlayer = game.Players.LocalPlayer
+            local myChar = localPlayer.Character
+            if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
+            for _, v in pairs(game.Players:GetPlayers()) do
+                if v.Name ~= localPlayer.Name and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (v.Character.HumanoidRootPart.Position - myChar.HumanoidRootPart.Position).Magnitude
+                    if dist < maxDist then
+                        maxDist = dist
+                        TargetPlayerAim = v.Name
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- Aim Skill theo player gần nhất
 spawn(function()
     pcall(function()
-        while task.wait() do
-            if _G.Aimbot_Skill and PlayerSelectAimbot ~= nil and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and game.Players.LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name]:FindFirstChild("MousePos") then
-                local args = {
-                    [1] = game:GetService("Players"):FindFirstChild(PlayerSelectAimbot).Character.HumanoidRootPart.Position
-                }
-                
-                game:GetService("Players").LocalPlayer.Character:FindFirstChild(game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name).RemoteEvent:FireServer(unpack(args))
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if AimSkillNearest and TargetPlayerAim then
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local tool = char and char:FindFirstChildOfClass("Tool")
+                local target = game.Players:FindFirstChild(TargetPlayerAim)
+
+                if tool and char:FindFirstChild(tool.Name) and char[tool.Name]:FindFirstChild("MousePos") and target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local args = {
+                        [1] = target.Character.HumanoidRootPart.Position
+                    }
+                    char[tool.Name].RemoteEvent:FireServer(unpack(args))
+                end
             end
-        end
+        end)
     end)
-end)
-
-spawn(function()
-	while wait(.1) do
-		pcall(function()
-			local MaxDistance = math.huge
-			for i,v in pairs(game:GetService("Players"):GetPlayers()) do
-				if v.Name ~= game.Players.LocalPlayer.Name then
-					local Distance = v:DistanceFromCharacter(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
-					if Distance < MaxDistance then
-						MaxDistance = Distance
-						TargetPlayerAim = v.Name
-					end
-				end
-			end
-		end)
-	end
-end)
-
-spawn(function()
-	pcall(function()
-		game:GetService("RunService").RenderStepped:connect(function()
-			if AimSkillNearest and TargetPlayerAim ~= nil and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and game.Players.LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name]:FindFirstChild("MousePos") then
-				local args = {
-					[1] = game:GetService("Players"):FindFirstChild(TargetPlayerAim).Character.HumanoidRootPart.Position
-				}
-				game:GetService("Players").LocalPlayer.Character[game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool").Name].RemoteEvent:FireServer(unpack(args))
-			end
-		end)
-	end)
 end)
 
 
