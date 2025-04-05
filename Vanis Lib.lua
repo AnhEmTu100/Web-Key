@@ -1,8 +1,9 @@
 
-local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AnhEmTu100/ui-free/refs/heads/main/Vanis%20Lib%20Source.lua'))()
-local Notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/r2lx-hub/Fluxus-R2LX/refs/heads/main/Notif.lua"))()
 -- Ví dụ cách chọn team
 getgenv().JoinMyTeam = "Marines"
+
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/AnhEmTu100/ui-free/refs/heads/main/Vanis%20Lib%20Source.lua'))()
+local Notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/r2lx-hub/Fluxus-R2LX/refs/heads/main/Notif.lua"))()
 
 --loadstring(game:HttpGet("https://raw.githubusercontent.com/ZoiIntra/AlchemyHub/main/InviteToDiscord.lua"))()
 
@@ -492,9 +493,129 @@ spawn(function()
     end
 end)
 
+-----
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+-- Toggle Aimbot
+Toggle = Se:CreateToggle("Simple Aimbot", "Khóa camera vào người chơi gần nhất", function(Value)
+    _G.AimbotEnabled = Value
+end)
+-- Hàm tìm player gần nhất (trừ LocalPlayer)
+local function getClosestTarget()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (Camera.CFrame.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    if closestPlayer then
+        return closestPlayer.Character.HumanoidRootPart
+    end
+    return nil
+end
+-- Aimbot đơn giản
+RunService.RenderStepped:Connect(function()
+    if _G.AimbotEnabled then
+        local targetPart = getClosestTarget()
+        if targetPart then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+        end
+    end
+end)
 
+-----
 
+-------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
 
+local FOV_RADIUS = 150
+local fovCircle
+
+-- Vẽ vòng FOV
+local function createFOV()
+    local circle = Drawing.new("Circle")
+    circle.Radius = FOV_RADIUS
+    circle.Thickness = 1
+    circle.Filled = false
+    circle.Transparency = 0.5
+    circle.Color = Color3.fromRGB(0, 255, 0)
+    circle.Visible = true
+    return circle
+end
+
+-- Cập nhật vị trí và bán kính FOV
+RunService.RenderStepped:Connect(function()
+    if fovCircle then
+        local mousePos = UserInputService:GetMouseLocation()
+        fovCircle.Position = Vector2.new(mousePos.X, mousePos.Y)
+        fovCircle.Radius = FOV_RADIUS
+    end
+end)
+
+-- Hàm tìm người chơi gần nhất trong FOV
+local function getClosestTargetInFOV()
+    local closestPlayer, shortest = nil, math.huge
+    local mousePos = UserInputService:GetMouseLocation()
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                if dist < FOV_RADIUS and dist < shortest then
+                    shortest = dist
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+
+    if closestPlayer then
+        return closestPlayer.Character.HumanoidRootPart
+    end
+    return nil
+end
+
+-- Toggle Aimbot
+Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu trong FOV", function(Value)
+    _G.AimbotEnab = Value
+    if Value then
+        fovCircle = createFOV()
+    else
+        if fovCircle then
+            fovCircle:Remove()
+            fovCircle = nil
+        end
+    end
+end)
+
+-- Slider điều chỉnh bán kính FOV
+Slider = Se:CreateSlider("FOV Radius", 50, 500, 150, function(val)
+    FOV_RADIUS = val
+end)
+
+-- Thực hiện Aimbot
+RunService.RenderStepped:Connect(function()
+    if _G.AimbotEnab then
+        local target = getClosestTargetInFOV()
+        if target then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+        end
+    end
+end)
+
+-----
 
 
 
