@@ -8,27 +8,7 @@ local Notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/r2lx-hu
 --loadstring(game:HttpGet("https://raw.githubusercontent.com/ZoiIntra/AlchemyHub/main/InviteToDiscord.lua"))()
 
 --// Aim
-aim = true
-spawn(function()
-    local gg = getrawmetatable(game)
-    local old = gg.__namecall
-    setreadonly(gg,false)
-    gg.__namecall = newcclosure(function(...)
-        local method = getnamecallmethod()
-        local args = {...}
-        if tostring(method) == "FireServer" then
-            if tostring(args[1]) == "RemoteEvent" then
-                if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
-                    if aim and CFrameHunt ~= nil then
-                        args[2] = CFrameHunt.Position
-                        return old(unpack(args))
-                    end
-                end
-            end
-        end
-        return old(...)
-    end)
-end)
+
 -- Tạo Thông Báo 💌 📢
 -- Add pop-up notification function
 -- Đảm bảo TweenService có sẵn
