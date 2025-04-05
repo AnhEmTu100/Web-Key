@@ -555,51 +555,35 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -----
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
-
-Toggle = pvp:CreateToggle("Simple Aimbot", "Khóa camera vào một người chơi khác bất kỳ", function(Value)
-    _G.AimbotEnabled = Value
+Toggle = pvp:CreateToggle("Simple Aimbot", "", function(Value)
+    AimbotSkillPlayer = Value
 end)
 
-RunService.RenderStepped:Connect(function()
-    if _G.AimbotEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, player.Character.HumanoidRootPart.Position)
-                break -- chỉ aim người đầu tiên tìm thấy
-            end
-        end
-    end
-end)
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-Toggle = pvp:CreateToggle("Simple Aimbot", "Gửi tọa độ người chơi khác đến skill/súng", function(Value)
-    _G.AimbotEnabled = Value
-end)
-
-RunService.RenderStepped:Connect(function()
-    if _G.AimbotEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local targetPos = player.Character.HumanoidRootPart.Position
-
-                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if tool and tool:FindFirstChild("MousePos") then
-                    local args = { [1] = targetPos }
-                    tool.RemoteEvent:FireServer(unpack(args))
+spawn(function()
+    local gg = getrawmetatable(game)
+    local old = gg.__namecall
+    setreadonly(gg,false)
+    gg.__namecall = newcclosure(function(...)
+        local method = getnamecallmethod()
+        local args = {...}
+        if tostring(method) == "FireServer" then
+            if tostring(args[1]) == "RemoteEvent" then
+                if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+                    if AimbotSkillPlayer then
+                        if type(args[2]) == "vector" then
+                            args[2] = Player_Position
+                        else
+                            args[2] = CFrame.new(Player_Position)
+                        end
+                        return old(unpack(args))
+                    end
                 end
-
-                break -- chỉ xử lý người đầu tiên tìm được
             end
         end
-    end
+        return old(...)
+    end)
 end)
+
 -------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
