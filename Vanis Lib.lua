@@ -267,6 +267,8 @@ local Page = Tab:CreateFrame("Chủ yếu | Main")
 
 local Function = Tab:CreateFrame("Chức năng | Function")
 
+local pvp = Tab:CreateFrame("Người chơi | Players")
+
 local Sv = Tab:CreateFrame("Máy chủ | Server")
 
 local Shop = Tab:CreateFrame("Cửa hàng | Shop")
