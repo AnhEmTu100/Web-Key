@@ -600,9 +600,14 @@ Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu t
     end
 end)
 
--- Slider điều chỉnh bán kính FOV
-Slider = Se:CreateSlider("FOV Radius", 50, 500, 150, function(val)
-    FOV_RADIUS = val
+
+TextBox = Se:CreateBox("FOV Radius", "Nhập bán kính FOV (VD: 150)", function(val)
+    local num = tonumber(val)
+    if num then
+        FOV_RADIUS = num
+    else
+        warn("Giá trị không hợp lệ, vui lòng nhập số.")
+    end
 end)
 
 -- Thực hiện Aimbot
@@ -616,10 +621,31 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -----
+local ToggleEnabled = false
+
+local function Click()
+    game:GetService("VirtualUser"):CaptureController()
+    game:GetService("VirtualUser"):Button1Down(Vector2.new(0,1,0,1))
+end
+
+Toggle = Se:CreateToggle("Simple Aimbot + FOV", "Khóa camera vào mục tiêu trong FOV", function(Value)
+    ToggleEnabled = Value
+    if ToggleEnabled then
+        -- Bắt đầu chạy aimbot
+        task.spawn(function()
+            while ToggleEnabled do
+                Click()
+                task.wait(0.1) -- điều chỉnh tần suất gọi Click() nếu cần
+            end
+        end)
+    end
+end)
 
 
-
-
+Toggle = Se:CreateToggle("Atiban chest", "DESCRIPTION", function(Value)
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("GetFruits")
+        game:GetService("Players").LocalPlayer.PlayerGui.Main.FruitShop.Visible = true	
+      end    )
 
 
 
